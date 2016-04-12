@@ -11,6 +11,18 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -72,7 +84,34 @@ public class MainActivity extends Activity {
                             .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
                     txtSpeechInput.setText(result.get(0));
                     // go get the goods from Adapt Service
-                    
+                    RequestQueue queue = Volley.newRequestQueue(this);
+                    StringRequest stringRequest = null;
+                    try {
+                        stringRequest = new StringRequest(Request.Method.GET, "http://192.168.7.145:5000?string=" + URLEncoder.encode(result.get(0), "utf-8"),
+                                new Response.Listener<String>() {
+                                    @Override
+                                    public void onResponse(String response) {
+                                        // parse out the JSON
+                                        try {
+                                            JSONObject res = new JSONObject(response);
+                                            txtSpeechInput.setText(res.toString());
+                                        } catch (JSONException e) {
+                                            txtSpeechInput.setText("failure");
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                }, new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                System.out.println(error.toString());
+                            }
+                        });
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+                    // Add the request to the RequestQueue.
+                    queue.add(stringRequest);
+
                 }
                 break;
             }
