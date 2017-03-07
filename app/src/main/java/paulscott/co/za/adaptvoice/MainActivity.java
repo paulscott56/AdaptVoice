@@ -87,7 +87,7 @@ public class MainActivity extends Activity {
                     RequestQueue queue = Volley.newRequestQueue(this);
                     StringRequest stringRequest = null;
                     try {
-                        stringRequest = new StringRequest(Request.Method.GET, "http://192.168.7.145:5000?string=" + URLEncoder.encode(result.get(0), "utf-8"),
+                        stringRequest = new StringRequest(Request.Method.GET, "http://192.168.0.85:5000?string=" + URLEncoder.encode(result.get(0), "utf-8"),
                                 new Response.Listener<String>() {
                                     @Override
                                     public void onResponse(String response) {
