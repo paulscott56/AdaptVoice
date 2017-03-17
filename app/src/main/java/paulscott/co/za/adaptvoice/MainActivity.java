@@ -18,17 +18,23 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 public class MainActivity extends Activity {
 
-    private TextView txtSpeechInput;
+    private RecyclerView mRecyclerView;
+    private RecyclerView.Adapter mAdapter;
+    private RecyclerView.LayoutManager mLayoutManager;
+
     private ImageButton btnSpeak;
     private final int REQ_CODE_SPEECH_INPUT = 100;
 
@@ -37,7 +43,14 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        txtSpeechInput = (TextView) findViewById(R.id.txtSpeechInput);
+        mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
+        mLayoutManager = new LinearLayoutManager(this);
+        mRecyclerView.setLayoutManager(mLayoutManager);
+
+        // specify an adapter (see also next example)
+        mAdapter = new MyAdapter(myDataset);
+        mRecyclerView.setAdapter(mAdapter);
+
         btnSpeak = (ImageButton) findViewById(R.id.btnSpeak);
 
         btnSpeak.setOnClickListener(new View.OnClickListener() {
@@ -87,14 +100,21 @@ public class MainActivity extends Activity {
                     RequestQueue queue = Volley.newRequestQueue(this);
                     StringRequest stringRequest = null;
                     try {
-                        stringRequest = new StringRequest(Request.Method.GET, "http://192.168.0.85:5000?string=" + URLEncoder.encode(result.get(0), "utf-8"),
+                        stringRequest = new StringRequest(Request.Method.GET, "http://sample-env.gue3p8duub.eu-west-2.elasticbeanstalk.com/?string=" + URLEncoder.encode(result.get(0), "utf-8"),
                                 new Response.Listener<String>() {
                                     @Override
                                     public void onResponse(String response) {
                                         // parse out the JSON
+                                        Map<Integer, JSONObject> carmap = new HashMap<Integer, JSONObject>();
                                         try {
                                             JSONObject res = new JSONObject(response);
-                                            txtSpeechInput.setText(res.toString());
+                                            JSONArray data = res.getJSONArray("data");
+                                            for(int i=0; i<data.length(); i++) {
+                                                JSONObject d = data.getJSONObject(i);
+                                                carmap.put(i, d);
+                                            }
+
+                                            //txtSpeechInput.setText(data.toString());
                                         } catch (JSONException e) {
                                             txtSpeechInput.setText("failure");
                                             e.printStackTrace();
